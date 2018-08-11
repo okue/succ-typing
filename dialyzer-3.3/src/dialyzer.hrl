@@ -70,8 +70,8 @@
                        | ?WARN_CONTRACT_SUPERTYPE | ?WARN_CALLGRAPH
                        | ?WARN_UNMATCHED_RETURN | ?WARN_RACE_CONDITION
                        | ?WARN_BEHAVIOUR | ?WARN_CONTRACT_RANGE
-		       | ?WARN_UNDEFINED_CALLBACK | ?WARN_UNKNOWN
-		       | ?WARN_MAP_CONSTRUCTION.
+                       | ?WARN_UNDEFINED_CALLBACK | ?WARN_UNKNOWN
+                       | ?WARN_MAP_CONSTRUCTION.
 
 %%
 %% This is the representation of each warning as they will be returned
@@ -108,7 +108,7 @@
 -type dial_options()  :: [dial_option()].
 -type fopt()          :: 'basename' | 'fullpath'.
 -type format()        :: 'formatted' | 'raw'.
--type label()	      :: non_neg_integer().
+-type label()              :: non_neg_integer().
 -type dial_warn_tags():: ordsets:ordset(dial_warn_tag()).
 -type rep_mode()      :: 'quiet' | 'normal' | 'verbose'.
 -type start_from()    :: 'byte_code' | 'src_code'.
@@ -121,54 +121,54 @@
 
 -type doc_plt() :: 'undefined' | dialyzer_plt:plt().
 
--record(analysis, {analysis_pid			   :: pid() | 'undefined',
-		   type		  = succ_typings   :: anal_type(),
-		   defines	  = []		   :: [dial_define()],
-		   doc_plt                         :: doc_plt(),
-		   files          = []		   :: [file:filename()],
-		   include_dirs	  = []		   :: [file:filename()],
-		   start_from     = byte_code	   :: start_from(),
-		   plt                             :: dialyzer_plt:plt(),
-		   use_contracts  = true           :: boolean(),
-		   race_detection = false	   :: boolean(),
-		   behaviours_chk = false          :: boolean(),
-		   timing         = false          :: boolean() | 'debug',
-		   timing_server  = none           :: dialyzer_timing:timing_server(),
-		   callgraph_file = ""             :: file:filename(),
+-record(analysis, {analysis_pid                    :: pid() | 'undefined',
+                   type           = succ_typings   :: anal_type(),
+                   defines        = []             :: [dial_define()],
+                   doc_plt                         :: doc_plt(),
+                   files          = []             :: [file:filename()],
+                   include_dirs   = []             :: [file:filename()],
+                   start_from     = byte_code      :: start_from(),
+                   plt                             :: dialyzer_plt:plt(),
+                   use_contracts  = true           :: boolean(),
+                   race_detection = false          :: boolean(),
+                   behaviours_chk = false          :: boolean(),
+                   timing         = false          :: boolean() | 'debug',
+                   timing_server  = none           :: dialyzer_timing:timing_server(),
+                   callgraph_file = ""             :: file:filename(),
                    solvers                         :: [solver()]}).
 
--record(options, {files           = []		   :: [file:filename()],
-		  files_rec       = []		   :: [file:filename()],
-		  analysis_type   = succ_typings   :: anal_type1(),
-		  timing          = false          :: boolean() | 'debug',
-		  defines         = []		   :: [dial_define()],
-		  from            = byte_code	   :: start_from(),
-		  get_warnings    = maybe          :: boolean() | 'maybe',
-		  init_plts       = []	           :: [file:filename()],
-		  include_dirs    = []		   :: [file:filename()],
-		  output_plt      = none           :: 'none' | file:filename(),
-		  legal_warnings  = ordsets:new()  :: dial_warn_tags(),
-		  report_mode     = normal	   :: rep_mode(),
-		  erlang_mode     = false	   :: boolean(),
-		  use_contracts   = true           :: boolean(),
-		  output_file     = none	   :: 'none' | file:filename(),
-		  output_format   = formatted      :: format(),
-		  filename_opt	  = basename       :: fopt(),
-		  callgraph_file  = ""             :: file:filename(),
-		  check_plt       = true           :: boolean(),
+-record(options, {files           = []             :: [file:filename()],
+                  files_rec       = []             :: [file:filename()],
+                  analysis_type   = succ_typings   :: anal_type1(),
+                  timing          = false          :: boolean() | 'debug',
+                  defines         = []             :: [dial_define()],
+                  from            = byte_code      :: start_from(),
+                  get_warnings    = maybe          :: boolean() | 'maybe',
+                  init_plts       = []             :: [file:filename()],
+                  include_dirs    = []             :: [file:filename()],
+                  output_plt      = none           :: 'none' | file:filename(),
+                  legal_warnings  = ordsets:new()  :: dial_warn_tags(),
+                  report_mode     = normal         :: rep_mode(),
+                  erlang_mode     = false          :: boolean(),
+                  use_contracts   = true           :: boolean(),
+                  output_file     = none           :: 'none' | file:filename(),
+                  output_format   = formatted      :: format(),
+                  filename_opt    = basename       :: fopt(),
+                  callgraph_file  = ""             :: file:filename(),
+                  check_plt       = true           :: boolean(),
                   solvers         = []             :: [solver()]}).
 
--record(contract, {contracts	  = []		   :: [contract_pair()],
-		   args		  = []		   :: [erl_types:erl_type()],
-		   forms	  = []		   :: [{_, _}]}).
+-record(contract, {contracts      = []                   :: [contract_pair()],
+                   args           = []                   :: [erl_types:erl_type()],
+                   forms          = []                   :: [{_, _}]}).
 
 %%--------------------------------------------------------------------
 
 -define(timing(Server, Msg, Var, Expr),
-	begin
-	    dialyzer_timing:start_stamp(Server, Msg),
-	    Var = Expr,
-	    dialyzer_timing:end_stamp(Server),
-	    Var
-	end).
+        begin
+            dialyzer_timing:start_stamp(Server, Msg),
+            Var = Expr,
+            dialyzer_timing:end_stamp(Server),
+            Var
+        end).
 -define(timing(Server, Msg, Expr), ?timing(Server, Msg, _T, Expr)).

@@ -1,6 +1,6 @@
 {"src/*", [
-	debug_info
-	,{i,"include/"}
-	,{outdir, "ebin/"}
-% ,{d, 'DEBUG'}
+      debug_info
+    , {i,"include/"}
+    , {outdir, "ebin/"}
+%   , {d, 'DEBUG'}
 ]}.

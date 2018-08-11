@@ -315,7 +315,7 @@ report_analysis_start(#options{analysis_type = Type,
             false -> io:format("Removing information from ~ts to ~ts...",
                                [InitPlt, OutputPlt])
           end;
-        succ_typings -> io:format("Proceeding with analysis...")
+        succ_typings -> io:format("Proceeding with analysis...~n")
       end
   end.
 
