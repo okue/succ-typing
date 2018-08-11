@@ -15,7 +15,7 @@
 -module(dialyzer_cl_parse).
 
 -export([start/0, get_lib_dir/1]).
--export([collect_args/1]).	% used also by typer
+-export([collect_args/1]).        % used also by typer
 
 -include("dialyzer.hrl").
 -define(VSN, "v3.3").
@@ -37,9 +37,10 @@
 start() ->
   init(),
   [_ | Args] = init:get_plain_arguments(),
-  io:format("~p~n", [Args]),
+  % io:format("~p~n", [Args]),
   try
     Ret = cl(Args),
+    % io:format("dialyzer_cl_parse:start/1 returns ~p~n", [Ret]),
     Ret
   catch
     throw:{dialyzer_cl_parse_error, Msg} -> {error, Msg};
@@ -210,17 +211,17 @@ cl([]) ->
   {RetTag, Opts} =
     case get(dialyzer_options_analysis_type) =:= plt_info of
       true ->
-	put(dialyzer_options_analysis_type, plt_check),
-	{plt_info, cl_options()};
+        put(dialyzer_options_analysis_type, plt_check),
+        {plt_info, cl_options()};
       false ->
-	case get(dialyzer_options_mode) of
-	  gui -> {gui, common_options()};
-	  cl ->
-	    case get(dialyzer_options_analysis_type) =:= plt_check of
-	      true  -> {check_init, cl_options()};
-	      false -> {cl, cl_options()}
-	    end
-	end
+        case get(dialyzer_options_mode) of
+          gui -> {gui, common_options()};
+          cl ->
+            case get(dialyzer_options_analysis_type) =:= plt_check of
+              true  -> {check_init, cl_options()};
+              false -> {cl, cl_options()}
+            end
+        end
     end,
   case dialyzer_options:build(Opts) of
     {error, Msg} -> cl_error(Msg);
@@ -326,10 +327,10 @@ get_lib_dir([H|T], Acc) ->
   NewElem =
     case code:lib_dir(list_to_atom(H)) of
       {error, bad_name} ->
-	case H =:= "erts" of % hack for including erts in an un-installed system
-	  true -> filename:join(code:root_dir(), "erts/preloaded/ebin");
-	  false -> H
-	end;
+        case H =:= "erts" of % hack for including erts in an un-installed system
+          true -> filename:join(code:root_dir(), "erts/preloaded/ebin");
+          false -> H
+        end;
       LibDir -> LibDir ++ "/ebin"
     end,
   get_lib_dir(T, [NewElem|Acc]);
@@ -356,12 +357,12 @@ help_warnings() ->
 
 help_message() ->
   S = "Usage: dialyzer [--help] [--version] [--shell] [--quiet] [--verbose]
-		[-pa dir]* [--plt plt] [--plts plt*] [-Ddefine]*
+                [-pa dir]* [--plt plt] [--plts plt*] [-Ddefine]*
                 [-I include_dir]* [--output_plt file] [-Wwarn]* [--raw]
                 [--src] [--gui] [files_or_dirs] [-r dirs]
                 [--apps applications] [-o outfile]
-		[--build_plt] [--add_to_plt] [--remove_from_plt]
-		[--check_plt] [--no_check_plt] [--plt_info] [--get_warnings]
+                [--build_plt] [--add_to_plt] [--remove_from_plt]
+                [--check_plt] [--no_check_plt] [--plt_info] [--get_warnings]
                 [--dump_callgraph file] [--no_native] [--fullpath]
                 [--statistics] [--no_native_cache]
 Options:
