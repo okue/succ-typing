@@ -214,7 +214,9 @@ check_contracts(Contracts, Callgraph, FunTypes, ModOpaques) ->
                       [] ->
                         [{MFA, Contract}|NewContracts];
                       _  ->
+                        % Comment out the folowing to use dialyzer as erlier than v3.3
                         % [{MFA, Contract}|NewContracts];
+                        % Comment out the folowing to use dialyzer as v3.3
                         NewContracts
                     end;
                   {error, _Error} ->
