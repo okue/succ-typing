@@ -1,2 +1,5 @@
 #!/usr/bin/env bash
-./bin/dialyzer -n examples/ex1.erl
+FILE=examples/ex2.erl
+echo $FILE
+./bin/dialyzer -n $FILE -Wspecdiffs
+# typer $FILE

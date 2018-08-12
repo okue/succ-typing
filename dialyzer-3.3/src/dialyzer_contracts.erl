@@ -190,7 +190,7 @@ check_contracts(Contracts, Callgraph, FunTypes, ModOpaques) ->
                 % io:format("check_contract is called:~ncontract is ~p~nsucc type is ~p~nopaque is ~p~n",
                 %           [Contract#contract.contracts, Type, Opaques]),
                 Res = check_contract(Contract, Type, Opaques),
-                % io:format("check_contract returns with ~p~n", [Res]),
+                io:format("check_contract returns with ~p~n", [Res]),
                 case Res of
                   ok ->
                     case erl_bif_types:is_known(M, F, A) of
@@ -215,9 +215,9 @@ check_contracts(Contracts, Callgraph, FunTypes, ModOpaques) ->
                         [{MFA, Contract}|NewContracts];
                       _  ->
                         % Comment out the folowing to use dialyzer as erlier than v3.3
-                        % [{MFA, Contract}|NewContracts];
+                        [{MFA, Contract}|NewContracts]
                         % Comment out the folowing to use dialyzer as v3.3
-                        NewContracts
+                        % NewContracts
                     end;
                   {error, _Error} ->
                     NewContracts
@@ -263,9 +263,18 @@ check_contract(#contract{contracts = Contracts}, SuccType, Opaques) ->
       ok ->
         InfList = [{Contract, erl_types:t_inf(Contract, SuccType, Opaques)}
                    || Contract <- Contracts2],
-        case check_contract_inf_list(InfList, SuccType, Opaques) of
+        %%%%%%
+        % lists:foreach(fun(X) -> io:format(">>~p~n", [X]) end, InfList),
+        %%%%%%
+        Res = check_contract_inf_list(InfList, SuccType, Opaques),
+        % io:format(">>~p~n", [Res]),
+        case Res of
           {error, _} = Invalid -> Invalid;
-          ok -> check_extraneous(Contracts2, SuccType)
+          ok ->
+            io:format(">>> ~p~n", [Contracts2]),
+            R = check_extraneous(Contracts2, SuccType),
+            io:format("+++ ~p~n", [R]),
+            R
         end
     end
   catch
@@ -320,6 +329,8 @@ check_contract_inf_list([], _SuccType, _Opaques, OM) ->
 
 check_extraneous([], _SuccType) -> ok;
 check_extraneous([C|Cs], SuccType) ->
+  io:format(">C~p~n", [C]),
+  io:format(" S~p~n", [SuccType]),
   case check_extraneous_1(C, SuccType) of
     {error, invalid_contract} = Error ->
       Error;
