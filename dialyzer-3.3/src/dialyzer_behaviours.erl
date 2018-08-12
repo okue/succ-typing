@@ -37,16 +37,16 @@
 -type rectab() :: erl_types:type_table().
 
 -record(state, {plt        :: dialyzer_plt:plt(),
-		codeserver :: dialyzer_codeserver:codeserver(),
-		filename   :: file:filename(),
-		behlines   :: [{behaviour(), non_neg_integer()}],
-		records    :: rectab()}).
+                codeserver :: dialyzer_codeserver:codeserver(),
+                filename   :: file:filename(),
+                behlines   :: [{behaviour(), non_neg_integer()}],
+                records    :: rectab()}).
 
 %%--------------------------------------------------------------------
 
 -spec check_callbacks(module(), [{cerl:cerl(), cerl:cerl()}], rectab(),
-		      dialyzer_plt:plt(),
-		      dialyzer_codeserver:codeserver()) -> [raw_warning()].
+                      dialyzer_plt:plt(),
+                      dialyzer_codeserver:codeserver()) -> [raw_warning()].
 
 check_callbacks(Module, Attrs, Records, Plt, Codeserver) ->
   {Behaviours, BehLines} = get_behaviours(Attrs),
@@ -69,7 +69,7 @@ get_behaviours(Attrs) ->
     [{cerl:concrete(L2), hd(cerl:get_ann(L2))} ||
       {L1, L2} <- Attrs, cerl:is_literal(L1),
       cerl:is_literal(L2), cerl:concrete(L1) =:= 'behaviour' orelse
-	cerl:concrete(L1) =:= 'behavior'],
+        cerl:concrete(L1) =:= 'behavior'],
   Behaviours = lists:append([Behs || {Behs,_} <- BehaviourListsAndLine]),
   BehLines = [{B,L} || {L1,L} <- BehaviourListsAndLine, B <- L1],
   {Behaviours, BehLines}.
@@ -93,8 +93,8 @@ check_behaviour(Module, Behaviour, #state{plt = Plt} = State, Acc) ->
 check_all_callbacks(_Module, _Behaviour, [], _State, Acc) ->
   Acc;
 check_all_callbacks(Module, Behaviour, [Cb|Rest],
-		    #state{plt = Plt, codeserver = Codeserver,
-			   records = Records} = State, Acc) ->
+                    #state{plt = Plt, codeserver = Codeserver,
+                           records = Records} = State, Acc) ->
   {{Behaviour, Function, Arity},
    {{_BehFile, _BehLine}, Callback, Xtra}} = Cb,
   CbMFA = {Module, Function, Arity},
@@ -109,57 +109,57 @@ check_all_callbacks(Module, Behaviour, [Cb|Rest],
           false -> [{callback_missing, [Behaviour, Function, Arity]}|Acc0]
         end;
       {'value', RetArgTypes} ->
-	Acc00 = Acc0,
-	{ReturnType, ArgTypes} = RetArgTypes,
-	Acc01 =
-	  case erl_types:t_is_subtype(ReturnType, CbReturnType) of
-	    true -> Acc00;
-	    false ->
-	      case erl_types:t_is_none(
-		     erl_types:t_inf(ReturnType, CbReturnType)) of
-		false -> Acc00;
-		true ->
-		  [{callback_type_mismatch,
-		    [Behaviour, Function, Arity,
-		     erl_types:t_to_string(ReturnType, Records),
-		     erl_types:t_to_string(CbReturnType, Records)]}|Acc00]
-	      end
-	  end,
-	case erl_types:any_none(erl_types:t_inf_lists(ArgTypes, CbArgTypes)) of
-	  false -> Acc01;
-	  true ->
-	    find_mismatching_args(type, ArgTypes, CbArgTypes, Behaviour,
-				  Function, Arity, Records, 1, Acc01)
-	end
+        Acc00 = Acc0,
+        {ReturnType, ArgTypes} = RetArgTypes,
+        Acc01 =
+          case erl_types:t_is_subtype(ReturnType, CbReturnType) of
+            true -> Acc00;
+            false ->
+              case erl_types:t_is_none(
+                     erl_types:t_inf(ReturnType, CbReturnType)) of
+                false -> Acc00;
+                true ->
+                  [{callback_type_mismatch,
+                    [Behaviour, Function, Arity,
+                     erl_types:t_to_string(ReturnType, Records),
+                     erl_types:t_to_string(CbReturnType, Records)]}|Acc00]
+              end
+          end,
+        case erl_types:any_none(erl_types:t_inf_lists(ArgTypes, CbArgTypes)) of
+          false -> Acc01;
+          true ->
+            find_mismatching_args(type, ArgTypes, CbArgTypes, Behaviour,
+                                  Function, Arity, Records, 1, Acc01)
+        end
     end,
   Acc2 =
     case dialyzer_codeserver:lookup_mfa_contract(CbMFA, Codeserver) of
       'error' -> Acc1;
       {ok, {{File, Line}, Contract, _Xtra}} ->
-	Acc10 = Acc1,
-	SpecReturnType0 = dialyzer_contracts:get_contract_return(Contract),
-	SpecArgTypes0 = dialyzer_contracts:get_contract_args(Contract),
-	SpecReturnType = erl_types:subst_all_vars_to_any(SpecReturnType0),
-	SpecArgTypes =
-	  [erl_types:subst_all_vars_to_any(ArgT0) || ArgT0 <- SpecArgTypes0],
-	Acc11 =
-	  case erl_types:t_is_subtype(SpecReturnType, CbReturnType) of
-	    true -> Acc10;
-	    false ->
-	      ExtraType = erl_types:t_subtract(SpecReturnType, CbReturnType),
-	      [{callback_spec_type_mismatch,
-		[File, Line, Behaviour, Function, Arity,
-		 erl_types:t_to_string(ExtraType, Records),
-		 erl_types:t_to_string(CbReturnType, Records)]}|Acc10]
-	  end,
-	case erl_types:any_none(
-	       erl_types:t_inf_lists(SpecArgTypes, CbArgTypes)) of
-	  false -> Acc11;
-	  true ->
-	    find_mismatching_args({spec, File, Line}, SpecArgTypes,
-				  CbArgTypes, Behaviour, Function,
-				  Arity, Records, 1, Acc11)
-	end
+        Acc10 = Acc1,
+        SpecReturnType0 = dialyzer_contracts:get_contract_return(Contract),
+        SpecArgTypes0 = dialyzer_contracts:get_contract_args(Contract),
+        SpecReturnType = erl_types:subst_all_vars_to_any(SpecReturnType0),
+        SpecArgTypes =
+          [erl_types:subst_all_vars_to_any(ArgT0) || ArgT0 <- SpecArgTypes0],
+        Acc11 =
+          case erl_types:t_is_subtype(SpecReturnType, CbReturnType) of
+            true -> Acc10;
+            false ->
+              ExtraType = erl_types:t_subtract(SpecReturnType, CbReturnType),
+              [{callback_spec_type_mismatch,
+                [File, Line, Behaviour, Function, Arity,
+                 erl_types:t_to_string(ExtraType, Records),
+                 erl_types:t_to_string(CbReturnType, Records)]}|Acc10]
+          end,
+        case erl_types:any_none(
+               erl_types:t_inf_lists(SpecArgTypes, CbArgTypes)) of
+          false -> Acc11;
+          true ->
+            find_mismatching_args({spec, File, Line}, SpecArgTypes,
+                                  CbArgTypes, Behaviour, Function,
+                                  Arity, Records, 1, Acc11)
+        end
     end,
   NewAcc = Acc2,
   check_all_callbacks(Module, Behaviour, Rest, State, NewAcc).
@@ -167,24 +167,24 @@ check_all_callbacks(Module, Behaviour, [Cb|Rest],
 find_mismatching_args(_, [], [], _Beh, _Function, _Arity, _Records, _N, Acc) ->
   Acc;
 find_mismatching_args(Kind, [Type|Rest], [CbType|CbRest], Behaviour,
-		      Function, Arity, Records, N, Acc) ->
+                      Function, Arity, Records, N, Acc) ->
   case erl_types:t_is_none(erl_types:t_inf(Type, CbType)) of
     false ->
       find_mismatching_args(Kind, Rest, CbRest, Behaviour, Function,
-			    Arity, Records, N+1, Acc);
+                            Arity, Records, N+1, Acc);
     true ->
       Info =
-	[Behaviour, Function, Arity, N,
-	 erl_types:t_to_string(Type, Records),
-	 erl_types:t_to_string(CbType, Records)],
+        [Behaviour, Function, Arity, N,
+         erl_types:t_to_string(Type, Records),
+         erl_types:t_to_string(CbType, Records)],
       NewAcc =
-	[case Kind of
-	   type -> {callback_arg_type_mismatch, Info};
-	   {spec, File, Line} ->
-	     {callback_spec_arg_type_mismatch, [File, Line | Info]}
-	 end | Acc],
+        [case Kind of
+           type -> {callback_arg_type_mismatch, Info};
+           {spec, File, Line} ->
+             {callback_spec_arg_type_mismatch, [File, Line | Info]}
+         end | Acc],
       find_mismatching_args(Kind, Rest, CbRest, Behaviour, Function,
-			    Arity, Records, N+1, NewAcc)
+                            Arity, Records, N+1, NewAcc)
   end.
 
 add_tag_warning_info(Module, {Tag, [B|_R]} = Warn, State)
@@ -204,7 +204,7 @@ add_tag_warning_info(Module, {Tag, [File, Line|R]}, _State)
 add_tag_warning_info(Module, {_Tag, [_B, Fun, Arity|_R]} = Warn, State) ->
   {_A, FunCode} =
     dialyzer_codeserver:lookup_mfa_code({Module, Fun, Arity},
-					State#state.codeserver),
+                                        State#state.codeserver),
   Anns = cerl:get_ann(FunCode),
   File = get_file(State#state.codeserver, Module, Anns),
   WarningInfo = {File, get_line(Anns), {Module, Fun, Arity}},

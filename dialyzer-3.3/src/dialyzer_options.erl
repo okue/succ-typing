@@ -28,20 +28,20 @@
 
 build(Opts) ->
   DefaultWarns = [?WARN_RETURN_NO_RETURN,
-		  ?WARN_NOT_CALLED,
-		  ?WARN_NON_PROPER_LIST,
-		  ?WARN_FUN_APP,
-		  ?WARN_MATCHING,
-		  ?WARN_OPAQUE,
-		  ?WARN_CALLGRAPH,
-		  ?WARN_FAILING_CALL,
-		  ?WARN_BIN_CONSTRUCTION,
-		  ?WARN_MAP_CONSTRUCTION,
-		  ?WARN_CONTRACT_RANGE,
-		  ?WARN_CONTRACT_TYPES,
-		  ?WARN_CONTRACT_SYNTAX,
-		  ?WARN_BEHAVIOUR,
-		  ?WARN_UNDEFINED_CALLBACK],
+                  ?WARN_NOT_CALLED,
+                  ?WARN_NON_PROPER_LIST,
+                  ?WARN_FUN_APP,
+                  ?WARN_MATCHING,
+                  ?WARN_OPAQUE,
+                  ?WARN_CALLGRAPH,
+                  ?WARN_FAILING_CALL,
+                  ?WARN_BIN_CONSTRUCTION,
+                  ?WARN_MAP_CONSTRUCTION,
+                  ?WARN_CONTRACT_RANGE,
+                  ?WARN_CONTRACT_TYPES,
+                  ?WARN_CONTRACT_SYNTAX,
+                  ?WARN_BEHAVIOUR,
+                  ?WARN_UNDEFINED_CALLBACK],
   DefaultWarns1 = ordsets:from_list(DefaultWarns),
   InitPlt = dialyzer_plt:get_default_plt(),
   DefaultOpts = #options{},
@@ -72,40 +72,40 @@ check_file_existence(#options{files = Files, files_rec = FilesRec}) ->
   assert_filenames_exist(FilesRec).
 
 check_output_plt(Opts = #options{analysis_type = Mode, from = From,
-				 output_plt = OutPLT}) ->
+                                 output_plt = OutPLT}) ->
   case is_plt_mode(Mode) of
     true ->
       case From =:= byte_code of
-	true -> Opts;
-	false ->
-	  Msg = "Byte code compiled with debug_info is needed to build the PLT",
-	  throw({dialyzer_error, Msg})
+        true -> Opts;
+        false ->
+          Msg = "Byte code compiled with debug_info is needed to build the PLT",
+          throw({dialyzer_error, Msg})
       end;
     false ->
       case OutPLT =:= none of
-	true -> Opts;
-	false ->
-	  Msg = io_lib:format("Output PLT cannot be specified "
-			      "in analysis mode ~w", [Mode]),
-	  throw({dialyzer_error, lists:flatten(Msg)})
+        true -> Opts;
+        false ->
+          Msg = io_lib:format("Output PLT cannot be specified "
+                              "in analysis mode ~w", [Mode]),
+          throw({dialyzer_error, lists:flatten(Msg)})
       end
   end.
 
 adapt_get_warnings(Opts = #options{analysis_type = Mode,
-				   get_warnings = Warns}) ->
+                                   get_warnings = Warns}) ->
   %% Warnings are off by default in plt mode, and on by default in
   %% success typings mode. User defined warning mode overrides the
   %% default.
   case is_plt_mode(Mode) of
     true ->
       case Warns =:= maybe of
-	true -> Opts#options{get_warnings = false};
-	false -> Opts
+        true -> Opts#options{get_warnings = false};
+        false -> Opts
       end;
     false ->
       case Warns =:= maybe of
-	true -> Opts#options{get_warnings = true};
-	false -> Opts
+        true -> Opts#options{get_warnings = true};
+        false -> Opts
       end
   end.
 
@@ -133,16 +133,16 @@ build_options([{OptionName, Value} = Term|Rest], Options) ->
       build_options(Rest, Options#options{files_rec = Value ++ OldValues});
     analysis_type ->
       NewOptions =
-	case Value of
-	  succ_typings -> Options#options{analysis_type = Value};
-	  plt_add      -> Options#options{analysis_type = Value};
-	  plt_build    -> Options#options{analysis_type = Value};
-	  plt_check    -> Options#options{analysis_type = Value};
-	  plt_remove   -> Options#options{analysis_type = Value};
-	  dataflow  -> bad_option("Analysis type is no longer supported", Term);
-	  old_style -> bad_option("Analysis type is no longer supported", Term);
-	  Other     -> bad_option("Unknown analysis type", Other)
-	end,
+        case Value of
+          succ_typings -> Options#options{analysis_type = Value};
+          plt_add      -> Options#options{analysis_type = Value};
+          plt_build    -> Options#options{analysis_type = Value};
+          plt_check    -> Options#options{analysis_type = Value};
+          plt_remove   -> Options#options{analysis_type = Value};
+          dataflow  -> bad_option("Analysis type is no longer supported", Term);
+          old_style -> bad_option("Analysis type is no longer supported", Term);
+          Other     -> bad_option("Unknown analysis type", Other)
+        end,
       assert_plt_op(Options, NewOptions),
       build_options(Rest, NewOptions);
     check_plt when is_boolean(Value) ->
@@ -254,7 +254,7 @@ assert_filename_opt(Term) ->
   bad_option("Illegal value for filename_opt", Term).
 
 assert_plt_op(#options{analysis_type = OldVal}, 
-	      #options{analysis_type = NewVal}) ->
+              #options{analysis_type = NewVal}) ->
   case is_plt_mode(OldVal) andalso is_plt_mode(NewVal) of
     true -> bad_option("Options cannot be combined", [OldVal, NewVal]);
     false -> ok
@@ -284,47 +284,47 @@ build_warnings([Opt|Opts], Warnings) ->
   NewWarnings =
     case Opt of
       no_return ->
-	ordsets:del_element(?WARN_RETURN_NO_RETURN, Warnings);
+        ordsets:del_element(?WARN_RETURN_NO_RETURN, Warnings);
       no_unused ->
-	ordsets:del_element(?WARN_NOT_CALLED, Warnings);
+        ordsets:del_element(?WARN_NOT_CALLED, Warnings);
       no_improper_lists ->
-	ordsets:del_element(?WARN_NON_PROPER_LIST, Warnings);
+        ordsets:del_element(?WARN_NON_PROPER_LIST, Warnings);
       no_fun_app ->
-	ordsets:del_element(?WARN_FUN_APP, Warnings);
+        ordsets:del_element(?WARN_FUN_APP, Warnings);
       no_match ->
-	ordsets:del_element(?WARN_MATCHING, Warnings);
+        ordsets:del_element(?WARN_MATCHING, Warnings);
       no_opaque ->
-	ordsets:del_element(?WARN_OPAQUE, Warnings);
+        ordsets:del_element(?WARN_OPAQUE, Warnings);
       no_fail_call ->
-	ordsets:del_element(?WARN_FAILING_CALL, Warnings);
+        ordsets:del_element(?WARN_FAILING_CALL, Warnings);
       no_contracts ->
-	Warnings1 = ordsets:del_element(?WARN_CONTRACT_SYNTAX, Warnings),
-	ordsets:del_element(?WARN_CONTRACT_TYPES, Warnings1);
+        Warnings1 = ordsets:del_element(?WARN_CONTRACT_SYNTAX, Warnings),
+        ordsets:del_element(?WARN_CONTRACT_TYPES, Warnings1);
       no_behaviours ->
-	ordsets:del_element(?WARN_BEHAVIOUR, Warnings);
+        ordsets:del_element(?WARN_BEHAVIOUR, Warnings);
       no_undefined_callbacks ->
-	ordsets:del_element(?WARN_UNDEFINED_CALLBACK, Warnings);
+        ordsets:del_element(?WARN_UNDEFINED_CALLBACK, Warnings);
       unmatched_returns ->
-	ordsets:add_element(?WARN_UNMATCHED_RETURN, Warnings);
+        ordsets:add_element(?WARN_UNMATCHED_RETURN, Warnings);
       error_handling ->
-	ordsets:add_element(?WARN_RETURN_ONLY_EXIT, Warnings);
+        ordsets:add_element(?WARN_RETURN_ONLY_EXIT, Warnings);
       race_conditions ->
-	ordsets:add_element(?WARN_RACE_CONDITION, Warnings);
+        ordsets:add_element(?WARN_RACE_CONDITION, Warnings);
       no_missing_calls ->
         ordsets:del_element(?WARN_CALLGRAPH, Warnings);
       specdiffs ->
-	S = ordsets:from_list([?WARN_CONTRACT_SUBTYPE, 
-			       ?WARN_CONTRACT_SUPERTYPE,
-			       ?WARN_CONTRACT_NOT_EQUAL]),
-	ordsets:union(S, Warnings);
+        S = ordsets:from_list([?WARN_CONTRACT_SUBTYPE, 
+                               ?WARN_CONTRACT_SUPERTYPE,
+                               ?WARN_CONTRACT_NOT_EQUAL]),
+        ordsets:union(S, Warnings);
       overspecs ->
-	ordsets:add_element(?WARN_CONTRACT_SUBTYPE, Warnings);
+        ordsets:add_element(?WARN_CONTRACT_SUBTYPE, Warnings);
       underspecs ->
-	ordsets:add_element(?WARN_CONTRACT_SUPERTYPE, Warnings);
+        ordsets:add_element(?WARN_CONTRACT_SUPERTYPE, Warnings);
       unknown ->
-	ordsets:add_element(?WARN_UNKNOWN, Warnings);
+        ordsets:add_element(?WARN_UNKNOWN, Warnings);
       OtherAtom ->
-	bad_option("Unknown dialyzer warning option", OtherAtom)
+        bad_option("Unknown dialyzer warning option", OtherAtom)
     end,
   build_warnings(Opts, NewWarnings);
 build_warnings([], Warnings) ->
