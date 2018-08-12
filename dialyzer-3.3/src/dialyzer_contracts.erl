@@ -189,9 +189,7 @@ check_contracts(Contracts, Callgraph, FunTypes, ModOpaques) ->
                 {M, Opaques} = lists:keyfind(M, 1, ModOpaques),
                 % io:format("check_contract is called:~ncontract is ~p~nsucc type is ~p~nopaque is ~p~n",
                 %           [Contract#contract.contracts, Type, Opaques]),
-                Res = check_contract(Contract, Type, Opaques),
-                io:format("check_contract returns with ~p~n", [Res]),
-                case Res of
+                case check_contract(Contract, Type, Opaques) of
                   ok ->
                     case erl_bif_types:is_known(M, F, A) of
                       true ->
@@ -263,18 +261,9 @@ check_contract(#contract{contracts = Contracts}, SuccType, Opaques) ->
       ok ->
         InfList = [{Contract, erl_types:t_inf(Contract, SuccType, Opaques)}
                    || Contract <- Contracts2],
-        %%%%%%
-        % lists:foreach(fun(X) -> io:format(">>~p~n", [X]) end, InfList),
-        %%%%%%
-        Res = check_contract_inf_list(InfList, SuccType, Opaques),
-        % io:format(">>~p~n", [Res]),
-        case Res of
+        case check_contract_inf_list(InfList, SuccType, Opaques) of
           {error, _} = Invalid -> Invalid;
-          ok ->
-            io:format(">>> ~p~n", [Contracts2]),
-            R = check_extraneous(Contracts2, SuccType),
-            io:format("+++ ~p~n", [R]),
-            R
+          ok -> check_extraneous(Contracts2, SuccType)
         end
     end
   catch
@@ -329,8 +318,6 @@ check_contract_inf_list([], _SuccType, _Opaques, OM) ->
 
 check_extraneous([], _SuccType) -> ok;
 check_extraneous([C|Cs], SuccType) ->
-  io:format(">C~p~n", [C]),
-  io:format(" S~p~n", [SuccType]),
   case check_extraneous_1(C, SuccType) of
     {error, invalid_contract} = Error ->
       Error;
@@ -343,22 +330,30 @@ check_extraneous([C|Cs], SuccType) ->
       end
   end.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% specの型のrangeが, success typeからはみ出ているか?
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 check_extraneous_1(Contract, SuccType) ->
-  CRng = erl_types:t_fun_range(Contract),
+  CRng  = erl_types:t_fun_range(Contract),
   CRngs = erl_types:t_elements(CRng),
   STRng = erl_types:t_fun_range(SuccType),
-  ?debug("\nCR = ~ts\nSR = ~ts\n", [erl_types:t_to_string(CRng),
-                                    erl_types:t_to_string(STRng)]),
+  % ?debug("\nCR = ~ts\nSR = ~ts\n", [erl_types:t_to_string(CRng),
+  %                                   erl_types:t_to_string(STRng)]),
+  %% t_inf returns infimum of types
   case [CR || CR <- CRngs,
               erl_types:t_is_none(erl_types:t_inf(CR, STRng))] of
     [] ->
       case bad_extraneous_list(CRng, STRng)
-        orelse bad_extraneous_map(CRng, STRng)
+           orelse bad_extraneous_map(CRng, STRng)
       of
-        true -> {error, invalid_contract};
+        true ->
+          %%% MAYBE: unreachable
+          {error, invalid_contract};
         false -> ok
       end;
-    CRs -> {error, {extra_range, erl_types:t_sup(CRs), STRng}}
+    CRs ->
+      % contract rangeとsuccess typeを比較して, はみ出てるか?
+      {error, {extra_range, erl_types:t_sup(CRs), STRng}}
   end.
 
 bad_extraneous_list(CRng, STRng) ->
@@ -391,9 +386,12 @@ map_part(Type) ->
 is_empty_map(Type) ->
   erl_types:t_is_equal(Type, erl_types:t_from_term(#{})).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% success type の型のrangeが, specからはみ出ているか?
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 check_missing(Contract, SuccType) ->
-  CRng = erl_types:t_fun_range(Contract),
-  STRng = erl_types:t_fun_range(SuccType),
+  CRng   = erl_types:t_fun_range(Contract),
+  STRng  = erl_types:t_fun_range(SuccType),
   STRngs = erl_types:t_elements(STRng),
   ?debug("\nCR = ~ts\nSR = ~ts\n", [erl_types:t_to_string(CRng),
                                     erl_types:t_to_string(STRng)]),

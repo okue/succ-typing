@@ -5,8 +5,7 @@
 ]).
 
 % -spec f(1 | 2 | 3) -> ooook | ok.
--spec f(1) -> ook;
-       (2) -> error.
+-spec f(1) -> ok | error.
 f(1) -> ok;
 f(2) -> error.
 
