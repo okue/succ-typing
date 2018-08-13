@@ -65,8 +65,36 @@ v3.3では, 捨てられなくなっている.
 
 **specの型と推論される型の組み合わせ方**
 
-specの出力の型と推論される出力の型の下限(inf)を, 関数の出力の型とする.
+specの出力の型と推論される出力の型の下限(inf)を, 関数の出力の型として推論を進める.
 {dialyzer_typesig.erl, 818行}
+
+
+```erl
+-spec f(integer()) -> ook | error.
+f(1) -> ok;
+f(2) -> error.
+
+t(X) when is_integer(X) ->
+  ok = f(X).
+
+t2(X) when is_integer(X) ->
+  error = f(X).
+```
+
+例えば上では, fは `(1 | 2) -> ok | error` と推論される.
+fにspecが書かれていない場合, fはokまたはerrorを返す可能性があるので, 関数t, t2はパターンマッチに成功しうる.
+したがって, t, t2には型 `(1 | 2) -> ok`, `(1 | 2) -> error` が付く.
+
+
+しかし, 今回fには, `(integer()) -> ook | error` というtypoを含むspecが書かれている.
+関数t, t2におけるパターンマッチが成功するか否かを推論するとき, 推論されたfの型に加えてspecの内容が利用される.
+
+推論された型 `(1 | 2) -> ok | error` と specの型 `(integer()) -> ook | error` の出力の型を組み合わせ,
+fの返り値の型は inf(ok | error, ook | error) = error の部分型としてパターンマッチの箇所を推論する.
+
+tについて, fの返り値はerrorの部分型, つまりerrorなのでokとマッチしえないので, 型が付かないと警告が起こる.
+
+t2について, fの返り値はerrorでパターンマッチに成功するので, t2には `(1 | 2) -> error` 型がつく.
 
 
 ---
