@@ -211,22 +211,6 @@ postprocess_dataflow_warns([{?WARN_CONTRACT_RANGE, WarningInfo, Msg}|Rest],
       postprocess_dataflow_warns(Rest, Codeserver, WAcc, [W|Acc])
   end.
   
-refine_succ_typings(Modules, #st{codeserver = Codeserver,
-                                 callgraph = Callgraph,
-                                 plt = Plt,
-                                 timing_server = Timing,
-                                 solvers = Solvers} = State) ->
-  ?debug("Module postorder: ~p\n", [Modules]),
-  Init = {Codeserver, Callgraph, Plt, Solvers},
-  NotFixpoint =
-    ?timing(Timing, "refine",
-            dialyzer_coordinator:parallel_job(dataflow, Modules, Init, Timing)),
-  ?debug("==================== Dataflow done ====================\n\n", []),
-  case NotFixpoint =:= [] of
-    true -> {fixpoint, State};
-    false -> {not_fixpoint, NotFixpoint, State}
-  end.
-
 -spec find_depends_on(scc() | module(), fixpoint_init_data()) -> [scc()].
 
 find_depends_on(SCC, {_Codeserver, Callgraph, _Plt, _Solvers}) ->
@@ -245,10 +229,10 @@ lookup_names(Labels, {_Codeserver, Callgraph, _Plt, _Solvers}) ->
 -spec refine_one_module(module(), dataflow_init_data()) -> [label()]. % ordset
 
 refine_one_module(M, {CodeServer, Callgraph, Plt, _Solvers}) ->
-  ModCode = dialyzer_codeserver:lookup_mod_code(M, CodeServer),
-  AllFuns = collect_fun_info([ModCode]),
+  ModCode  = dialyzer_codeserver:lookup_mod_code(M, CodeServer),
+  AllFuns  = collect_fun_info([ModCode]),
   FunTypes = get_fun_types_from_plt(AllFuns, Callgraph, Plt),
-  Records = dialyzer_codeserver:lookup_mod_records(M, CodeServer),
+  Records  = dialyzer_codeserver:lookup_mod_records(M, CodeServer),
   NewFunTypes =
     dialyzer_dataflow:get_fun_types(ModCode, Plt, Callgraph, CodeServer, Records),
   {FunMFAContracts, ModOpaques} =
@@ -319,14 +303,32 @@ compare_types_1([], [], _Strict, NotFixpoint) ->
     false -> {false, NotFixpoint}
   end.
 
-find_succ_typings(SCCs, #st{codeserver = Codeserver, callgraph = Callgraph,
-                            plt = Plt, timing_server = Timing,
+find_succ_typings(SCCs, #st{codeserver = Codeserver,
+                            callgraph = Callgraph,
+                            plt = Plt,
+                            timing_server = Timing,
                             solvers = Solvers} = State) ->
   Init = {Codeserver, Callgraph, Plt, Solvers},
   NotFixpoint =
     ?timing(Timing, "typesig",
             dialyzer_coordinator:parallel_job(typesig, SCCs, Init, Timing)),
   ?debug("==================== Typesig done ====================\n\n", []),
+  case NotFixpoint =:= [] of
+    true -> {fixpoint, State};
+    false -> {not_fixpoint, NotFixpoint, State}
+  end.
+
+refine_succ_typings(Modules, #st{codeserver = Codeserver,
+                                 callgraph = Callgraph,
+                                 plt = Plt,
+                                 timing_server = Timing,
+                                 solvers = Solvers} = State) ->
+  ?debug("Module postorder: ~p\n", [Modules]),
+  Init = {Codeserver, Callgraph, Plt, Solvers},
+  NotFixpoint =
+    ?timing(Timing, "refine",
+            dialyzer_coordinator:parallel_job(dataflow, Modules, Init, Timing)),
+  ?debug("==================== Dataflow done ====================\n\n", []),
   case NotFixpoint =:= [] of
     true -> {fixpoint, State};
     false -> {not_fixpoint, NotFixpoint, State}
@@ -362,8 +364,6 @@ find_succ_types_for_scc(SCC0, {Codeserver, Callgraph, Plt, Solvers}) ->
     dialyzer_contracts:check_contracts(Contracts, Callgraph,
                                        DecoratedFunTypes,
                                        ModOpaques),
-  % ?debug("FilteredFunTypes ~tp\n   ~n", [FilteredFunTypes]),
-  % ?debug("SCC DecoratedFunTypes ~tp\n   ~n", [DecoratedFunTypes]),
   debug_pp_functions("SCC", FilteredFunTypes, DecoratedFunTypes, Callgraph),
   NewPltContracts = [MC ||
                       {MFA, _C}=MC <- PltContracts,

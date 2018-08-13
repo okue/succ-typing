@@ -22,40 +22,40 @@
 -module(dialyzer_codeserver).
 
 -export([delete/1,
-	 store_temp_contracts/4,
+         store_temp_contracts/4,
          give_away/2,
-	 finalize_contracts/1,
+         finalize_contracts/1,
          finalize_exported_types/2,
-	 finalize_records/1,
-	 get_contracts/1,
-	 get_callbacks/1,
+         finalize_records/1,
+         get_contracts/1,
+         get_callbacks/1,
          get_exported_types/1,
          extract_exported_types/1,
-	 get_exports/1,
-	 get_records_table/1,
+         get_exports/1,
+         get_records_table/1,
          extract_records/1,
-	 get_next_core_label/1,
+         get_next_core_label/1,
          get_temp_contracts/2,
          all_temp_modules/1,
          store_contracts/4,
          get_temp_exported_types/1,
          get_temp_records_table/1,
-	 lookup_temp_mod_records/2,
-	 insert/3,
-	 insert_exports/2,
+         lookup_temp_mod_records/2,
+         insert/3,
+         insert_exports/2,
          insert_temp_exported_types/2,
          insert_fun_meta_info/2,
-	 is_exported/2,
-	 lookup_mod_code/2,
-	 lookup_mfa_code/2,
-	 lookup_mfa_var_label/2,
-	 lookup_mod_records/2,
-	 lookup_mod_contracts/2,
-	 lookup_mfa_contract/2,
+         is_exported/2,
+         lookup_mod_code/2,
+         lookup_mfa_code/2,
+         lookup_mfa_var_label/2,
+         lookup_mod_records/2,
+         lookup_mod_contracts/2,
+         lookup_mfa_contract/2,
          lookup_meta_info/2,
-	 new/0,
-	 set_next_core_label/2,
-	 store_temp_records/3,
+         new/0,
+         set_next_core_label/2,
+         store_temp_records/3,
          translate_fake_file/3]).
 
 -export_type([codeserver/0, fun_meta_info/0, contracts/0]).
@@ -66,7 +66,7 @@
 
 -type dict_ets() :: ets:tid().
 -type map_ets()  :: ets:tid().
--type  set_ets() :: ets:tid().
+-type set_ets()  :: ets:tid().
 
 -type types()         :: erl_types:type_table().
 
@@ -79,18 +79,18 @@
                           | {module(), [dial_warn_tag()]}].
 
 -record(codeserver, {next_core_label = 0 :: label(),
-		     code		 :: dict_ets(),
+                     code                 :: dict_ets(),
                      exported_types      :: 'clean' | set_ets(), % set(mfa())
-		     records             :: 'clean' | map_ets(),
-		     contracts           :: map_ets(),
-		     callbacks           :: map_ets(),
+                     records             :: 'clean' | map_ets(),
+                     contracts           :: map_ets(),
+                     callbacks           :: map_ets(),
                      fun_meta_info       :: dict_ets(), % {mfa(), meta_info()}
-		     exports             :: 'clean' | set_ets(), % set(mfa())
+                     exports             :: 'clean' | set_ets(), % set(mfa())
                      temp_exported_types :: 'clean' | set_ets(), % set(mfa())
-		     temp_records        :: 'clean' | map_ets(),
-		     temp_contracts      :: 'clean' | map_ets(),
-		     temp_callbacks      :: 'clean' | map_ets()
-		    }).
+                     temp_records        :: 'clean' | map_ets(),
+                     temp_contracts      :: 'clean' | map_ets(),
+                     temp_callbacks      :: 'clean' | map_ets()
+                    }).
 
 -opaque codeserver() :: #codeserver{}.
 
@@ -143,21 +143,21 @@ new() ->
    TempCallbacks] =
     [ets:new(Name, TempOptions) ||
       Name <-
-	[dialyzer_codeserver_exports, dialyzer_codeserver_fun_meta_info,
+        [dialyzer_codeserver_exports, dialyzer_codeserver_fun_meta_info,
          dialyzer_codeserver_temp_exported_types,
-	 dialyzer_codeserver_temp_records, dialyzer_codeserver_temp_contracts,
-	 dialyzer_codeserver_temp_callbacks]],
+         dialyzer_codeserver_temp_records, dialyzer_codeserver_temp_contracts,
+         dialyzer_codeserver_temp_callbacks]],
   #codeserver{code                = Code,
-	      exports             = Exports,
+              exports             = Exports,
               fun_meta_info       = FunMetaInfo,
               exported_types      = ExportedTypes,
               records             = Records,
               contracts           = Contracts,
               callbacks           = Callbacks,
-	      temp_exported_types = TempExportedTypes,
-	      temp_records        = TempRecords,
-	      temp_contracts      = TempContracts,
-	      temp_callbacks      = TempCallbacks}.
+              temp_exported_types = TempExportedTypes,
+              temp_records        = TempRecords,
+              temp_contracts      = TempContracts,
+              temp_callbacks      = TempCallbacks}.
 
 -spec delete(codeserver()) -> 'ok'.
 
@@ -369,11 +369,11 @@ get_callbacks(#codeserver{callbacks = CallbDict}) ->
   ets:tab2list(CallbDict).
 
 -spec store_temp_contracts(module(), contracts(), contracts(), codeserver()) ->
-	 codeserver().
+         codeserver().
 
 store_temp_contracts(Mod, SpecMap, CallbackMap,
-		     #codeserver{temp_contracts = Cn,
-				 temp_callbacks = Cb} = CS)
+                     #codeserver{temp_contracts = Cn,
+                                 temp_callbacks = Cb} = CS)
   when is_atom(Mod) ->
   %% Make sure Mod is stored even if there are no callbacks or
   %% contracts.

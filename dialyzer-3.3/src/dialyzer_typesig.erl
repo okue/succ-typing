@@ -814,11 +814,14 @@ get_plt_constr(MFA, Dst, ArgVars, State) ->
                              get_contract_return(C, ArgTypes)
                          end, ArgVars), GenArgs};
           {value, {PltRetType, PltArgTypes}} ->
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %% Need to combine the contract with the success typing.
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             {?mk_fun_var(
                 fun(Map) ->
                     ArgTypes = lookup_type_list(ArgVars, Map),
                     CRet = get_contract_return(C, ArgTypes),
+                    % io:format(">~p ~p~n", [CRet, PltRetType]),
                     t_inf(CRet, PltRetType)
                 end, ArgVars),
              [t_inf(X, Y) || {X, Y} <- lists:zip(GenArgs, PltArgTypes)]}
@@ -2474,8 +2477,8 @@ solve_one_c(#constraint{lhs = Lhs, rhs = Rhs, op = Op}, Map) ->
   LhsType = lookup_type(Lhs, Map),
   RhsType = lookup_type(Rhs, Map),
   Inf = t_inf(LhsType, RhsType),
-  ?debug("Solving: ~ts :: ~ts ~w ~ts :: ~ts\n\tInf: ~ts\n",
-         [format_type(Lhs), format_type(LhsType), Op,
+  ?debug("Solving: <~p> ~ts :: ~ts ~w ~ts :: ~ts\n\tInf: ~ts\n",
+         [Rhs, format_type(Lhs), format_type(LhsType), Op,
           format_type(Rhs), format_type(RhsType), format_type(Inf)]),
   case t_is_none(Inf) of
     true -> error;

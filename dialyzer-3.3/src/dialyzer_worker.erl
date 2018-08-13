@@ -26,12 +26,12 @@
 -type job()         :: dialyzer_coordinator:job().
 
 -record(state, {
-	  mode             :: mode(),
-	  job              :: job(),
-	  coordinator      :: coordinator(),
-	  init_data        :: init_data(),
-	  depends_on  = [] :: list()
-	 }).
+          mode             :: mode(),
+          job              :: job(),
+          coordinator      :: coordinator(),
+          init_data        :: init_data(),
+          depends_on  = [] :: list()
+         }).
 
 -include("dialyzer.hrl").
 
@@ -49,9 +49,9 @@
 
 launch(Mode, Job, InitData, Coordinator) ->
   State = #state{mode        = Mode,
-		 job         = Job,
-		 init_data   = InitData,
-		 coordinator = Coordinator},
+                 job         = Job,
+                 init_data   = InitData,
+                 coordinator = Coordinator},
   spawn_link(fun() -> init(State) end).
 
 %%--------------------------------------------------------------------
@@ -89,10 +89,10 @@ loop(running, #state{mode = 'compile'} = State) ->
   Result =
     case start_compilation(State) of
       {ok, EstimatedSize, Data} ->
-	Label = ask_coordinator_for_label(EstimatedSize, State),
-	continue_compilation(Label, Data);
+        Label = ask_coordinator_for_label(EstimatedSize, State),
+        continue_compilation(Label, Data);
       {error, _Reason} = Error ->
-	Error
+        Error
     end,
   report_to_coordinator(Result, State);
 loop(running, #state{mode = 'warnings'} = State) ->

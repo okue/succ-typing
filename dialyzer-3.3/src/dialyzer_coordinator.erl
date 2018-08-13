@@ -63,38 +63,38 @@
 -type warnings_result() :: [dial_warning()].
 
 -type init_data() :: compile_init_data() | typesig_init_data() |
-		     dataflow_init_data() | warnings_init_data().
+                     dataflow_init_data() | warnings_init_data().
 
 -type result() :: compile_result() | typesig_result() |
-		  dataflow_result() | warnings_result().
+                  dataflow_result() | warnings_result().
 
 -type job_result() :: dialyzer_analysis_callgraph:one_file_mid_error() |
                       dialyzer_analysis_callgraph:one_file_result_ok() |
                       typesig_result() | dataflow_result() | warnings_result().
 
 -record(state, {mode           :: mode(),
-		active     = 0 :: integer(),
-		result         :: result(),
-		next_label = 0 :: integer(),
+                active     = 0 :: integer(),
+                result         :: result(),
+                next_label = 0 :: integer(),
                 jobs           :: [job()],
                 job_fun        :: fun(),
-		init_data      :: init_data(),
-		regulator      :: regulator(),
-		scc_to_pid     :: scc_to_pid()
-	       }).
+                init_data      :: init_data(),
+                regulator      :: regulator(),
+                scc_to_pid     :: scc_to_pid()
+               }).
 
 -include("dialyzer.hrl").
 
 %%--------------------------------------------------------------------
 
 -spec parallel_job('compile', [compile_job()], compile_init_data(), timing()) ->
-		      {compile_result(), integer()};
-		  ('typesig', [typesig_job()], typesig_init_data(), timing()) ->
-		      typesig_result();
-		  ('dataflow', [dataflow_job()], dataflow_init_data(),
-		   timing()) -> dataflow_result();
-		  ('warnings', [warnings_job()], warnings_init_data(),
-		   timing()) -> warnings_result().
+                      {compile_result(), integer()};
+                  ('typesig', [typesig_job()], typesig_init_data(), timing()) ->
+                      typesig_result();
+                  ('dataflow', [dataflow_job()], dataflow_init_data(),
+                   timing()) -> dataflow_result();
+                  ('warnings', [warnings_job()], warnings_init_data(),
+                   timing()) -> warnings_result().
 
 parallel_job(Mode, Jobs, InitData, Timing) ->
   State = spawn_jobs(Mode, Jobs, InitData, Timing),
@@ -138,9 +138,9 @@ spawn_jobs(Mode, Jobs, InitData, Timing) ->
          init_data = InitData, regulator = Regulator, scc_to_pid = SCCtoPID}.
 
 collect_result(#state{mode = Mode, active = Active, result = Result,
-		      next_label = NextLabel, init_data = InitData,
+                      next_label = NextLabel, init_data = InitData,
                       jobs = JobsLeft, job_fun = JobFun,
-		      regulator = Regulator, scc_to_pid = SCCtoPID} = State) ->
+                      regulator = Regulator, scc_to_pid = SCCtoPID} = State) ->
   receive
     {next_label_request, Estimation, Pid} ->
       Pid ! {next_label_reply, NextLabel},
@@ -149,18 +149,18 @@ collect_result(#state{mode = Mode, active = Active, result = Result,
       NewResult = update_result(Mode, InitData, Job, Data, Result),
       TypesigOrDataflow = (Mode =:= 'typesig') orelse (Mode =:= 'dataflow'),
       case Active of
-	1 ->
-	  kill_regulator(Regulator),
-	  case Mode of
-	    'compile' ->
-	      {NewResult, NextLabel};
-	    _ when TypesigOrDataflow ->
-	      ets:delete(SCCtoPID),
-	      NewResult;
-	    'warnings' ->
-	      NewResult
-	  end;
-	N ->
+        1 ->
+          kill_regulator(Regulator),
+          case Mode of
+            'compile' ->
+              {NewResult, NextLabel};
+            _ when TypesigOrDataflow ->
+              ets:delete(SCCtoPID),
+              NewResult;
+            'warnings' ->
+              NewResult
+          end;
+        N ->
           case TypesigOrDataflow of
             true -> true = ets:delete(SCCtoPID, Job);
             false -> true
@@ -183,7 +183,7 @@ update_result(Mode, InitData, Job, Data, Result) ->
   case Mode of
     'compile' ->
       dialyzer_analysis_callgraph:add_to_result(Job, Data, Result,
-						InitData);
+                                                InitData);
     X when X =:= 'typesig'; X =:= 'dataflow' ->
       dialyzer_succ_typings:lookup_names(Data, InitData) ++ Result;
     'warnings' ->
@@ -243,21 +243,21 @@ regulator_loop(Tickets, Queue) ->
   receive
     {req, Pid} ->
       case Tickets of
-	0 ->
-	  regulator_loop(0, queue:in(Pid, Queue));
-	N ->
-	  activate_pid(Pid),
-	  regulator_loop(N-1, Queue)
+        0 ->
+          regulator_loop(0, queue:in(Pid, Queue));
+        N ->
+          activate_pid(Pid),
+          regulator_loop(N-1, Queue)
       end;
     done ->
       {Waiting, NewQueue} = queue:out(Queue),
       NewTickets =
-	case Waiting of
-	  empty -> Tickets + 1;
-	  {value, Pid} ->
-	    activate_pid(Pid),
-	    Tickets
-	end,
+        case Waiting of
+          empty -> Tickets + 1;
+          {value, Pid} ->
+            activate_pid(Pid),
+            Tickets
+        end,
       regulator_loop(NewTickets, NewQueue);
     stop -> ok
   end.

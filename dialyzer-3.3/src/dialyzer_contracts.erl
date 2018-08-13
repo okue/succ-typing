@@ -143,9 +143,9 @@ sequence([H|T], Delimiter) -> H ++ Delimiter ++ sequence(T, Delimiter).
                                        dialyzer_codeserver:codeserver().
 
 process_contract_remote_types(CodeServer) ->
-  Mods = dialyzer_codeserver:all_temp_modules(CodeServer),
+  Mods        = dialyzer_codeserver:all_temp_modules(CodeServer),
   RecordTable = dialyzer_codeserver:get_records_table(CodeServer),
-  ExpTypes = dialyzer_codeserver:get_exported_types(CodeServer),
+  ExpTypes    = dialyzer_codeserver:get_exported_types(CodeServer),
   ContractFun =
     fun({{_M, _F, _A}=MFA, {File, TmpContract, Xtra}}, C0) ->
         #tmp_contract{contract_funs = CFuns, forms = Forms} = TmpContract,
@@ -205,7 +205,7 @@ check_contracts(Contracts, Callgraph, FunTypes, ModOpaques) ->
                     %% since that prevents discovering other actual
                     %% errors
                     % io:format("~p ~p~n", [MFA, Contract]),
-                    io:format("~p -> ~p~nsucc type is ~p~n", [MFA, _Err, Type]),
+                    % io:format("~p -> ~p~nsucc type is ~p~n", [MFA, _Err, Type]),
                     % extra_rangeエラーがある場合にコントラクトを無視するのが, v3.3より前
                     % 無視しないのが, v3.3
                     case [0 || {error, {extra_range, _, _}} <- _RangeErrs] of
