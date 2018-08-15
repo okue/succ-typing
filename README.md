@@ -113,7 +113,7 @@ t(X) when is_integer(X) ->
 ```
 
 
-1. 関数適用f(3)の引数の型が, Success typingにもspecにも反する場合:
+2. 関数適用f(3)の引数の型が, Success typingにもspecにも反する場合:
 
 ```erl
 -spec f(1) -> ok;
@@ -129,7 +129,7 @@ t(X) when is_integer(X) ->
 ```
 
 
-1. 関数適用f(3)の引数の型が, specに反する場合:
+3. 関数適用f(3)の引数の型が, specに反する場合:
 
 ```erl
 -spec f(2) -> error.
