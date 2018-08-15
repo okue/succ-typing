@@ -97,6 +97,53 @@ tについて, fの返り値はerrorの部分型, つまりerrorなのでokと�
 t2について, fの返り値はerrorでパターンマッチに成功するので, t2には `(1 | 2) -> error` 型がつく.
 
 
+**警告の例**
+
+1. 関数適用f(3)の引数の型が, Success typingで推論されない場合:
+
+```erl
+f(1) -> ok;
+f(2) -> error.
+
+t(X) when is_integer(X) ->
+  ok = f(3).
+
+%% ex1.erl:15: Function t/1 has no local return
+%% ex1.erl:16: The call ex1:f(3) will never return since it differs in the 1st argument from the success typing arguments: (1 | 2)
+```
+
+
+1. 関数適用f(3)の引数の型が, Success typingにもspecにも反する場合:
+
+```erl
+-spec f(1) -> ok;
+       (2) -> error.
+f(1) -> ok;
+f(2) -> error.
+
+t(X) when is_integer(X) ->
+  ok = f(3).
+
+%% ex1.erl:15: Function t/1 has no local return
+%% ex1.erl:16: The call ex1:f(3) will never return since the success typing is (1 | 2) -> 'error' | 'ok' and the contract is (1) -> 'ok'; (2) -> 'error'
+```
+
+
+1. 関数適用f(3)の引数の型が, specに反する場合:
+
+```erl
+-spec f(2) -> error.
+f(1) -> ok;
+f(2) -> error.
+
+t(X) when is_integer(X) ->
+  ok = f(1).
+
+%% ex1.erl:14: Function t/1 has no local return
+%% ex1.erl:15: The call ex1:f(1) breaks the contract (2) -> 'error'
+```
+
+
 ---
 
 - [dialyzer公式のテスト. 検査できることや警告文の意味の理解の参考に](https://github.com/erlang/otp/tree/master/lib/dialyzer/test)
