@@ -621,6 +621,7 @@ traverse(Tree, DefinedVars, State) ->
             error -> erlang:error({'Undefined variable', Tree});
             {ok, Type} ->
               {State1, NewVar} = state__mk_var(State),
+              % io:format("~p~n", [State1]),
               {state__store_conj(NewVar, sub, Type, State1), NewVar}
           end
       end;
@@ -2477,8 +2478,8 @@ solve_one_c(#constraint{lhs = Lhs, rhs = Rhs, op = Op}, Map) ->
   LhsType = lookup_type(Lhs, Map),
   RhsType = lookup_type(Rhs, Map),
   Inf = t_inf(LhsType, RhsType),
-  ?debug("Solving: <~p> ~ts :: ~ts ~w ~ts :: ~ts\n\tInf: ~ts\n",
-         [Rhs, format_type(Lhs), format_type(LhsType), Op,
+  ?debug("Solving: ~ts :: ~ts ~w ~ts :: ~ts\n\tInf: ~ts\n",
+         [format_type(Lhs), format_type(LhsType), Op,
           format_type(Rhs), format_type(RhsType), format_type(Inf)]),
   case t_is_none(Inf) of
     true -> error;
@@ -2940,6 +2941,9 @@ state__finalize(State) ->
                     fvar_or_type()) -> #constraint{}.
 
 mk_constraint(Lhs, Op, Rhs) ->
+  ?debug(">~p~n", [Lhs]),
+  ?debug(" ~p~n", [Op]),
+  ?debug(" ~p~n", [Rhs]),
   case t_is_any(Lhs) orelse constraint_opnd_is_any(Rhs) of
     false ->
       Deps = find_constraint_deps([Lhs, Rhs]),
