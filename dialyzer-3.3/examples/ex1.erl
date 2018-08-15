@@ -7,11 +7,13 @@
 ]).
 
 -spec f(integer()) -> ook | error.
+% -spec f(2) -> ok.
 f(1) -> ok;
 f(2) -> error.
 
 t(X) when is_integer(X) ->
   ok = f(X).
+  % ok = f(1).
 
 % -spec f2(integer()) -> error.
 % f2(1) -> ok;

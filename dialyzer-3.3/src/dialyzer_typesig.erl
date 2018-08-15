@@ -789,6 +789,7 @@ handle_call(Call, DefinedVars, State) ->
       {state__store_conj_lists(MF, sub, [t_module(), t_atom()], State1), Dst}
   end.
 
+% これまでのsucc typingとspecから制約を生成する
 get_plt_constr(MFA, Dst, ArgVars, State) ->
   Plt = state__plt(State),
   PltRes = dialyzer_plt:lookup(Plt, MFA),
@@ -817,16 +818,24 @@ get_plt_constr(MFA, Dst, ArgVars, State) ->
           {value, {PltRetType, PltArgTypes}} ->
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %% Need to combine the contract with the success typing.
+            %%
+            %% domainおよびrangeの型情報を組み合わせている
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             {?mk_fun_var(
                 fun(Map) ->
                     ArgTypes = lookup_type_list(ArgVars, Map),
                     CRet = get_contract_return(C, ArgTypes),
-                    % io:format(">~p ~p~n", [CRet, PltRetType]),
+                    % rangeの型について, succ-typeとspecの下限をとる
                     t_inf(CRet, PltRetType)
                 end, ArgVars),
+             % domainの型について, succ-typeとspecの下限をとる
              [t_inf(X, Y) || {X, Y} <- lists:zip(GenArgs, PltArgTypes)]}
         end,
+      %% ArgVars: 入力の型
+      %% Dst    : 出力の型
+      %% ArgCs  : succ-typeとspecの下限をとった入力の型
+      %% RetType: succ-typeとspecの下限をとった出力の型
+      %% Stateに, 制約を追加していく
       state__store_conj_lists([Dst|ArgVars], sub, [RetType|ArgCs], State)
   end.
 
