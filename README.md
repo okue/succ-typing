@@ -144,6 +144,13 @@ t(X) when is_integer(X) ->
 ```
 
 
+**build_plt時のファイルやディレクトリの指定**
+
+`-c` または何も付けずにディレクトリを指定すると, ディレクトリ下のBEAMファイルを探す.
+`-r` でディレクトリを指定すると, ディレクトリ下のBEAMファイルを再帰的に探す.
+`--apps` で名前を指定すると, 該当するディレクトリ直下のebin以下からBEAMファイルを再帰的に探す.
+
+
 ---
 
 - [dialyzer公式のテスト. 検査できることや警告文の意味の理解の参考に](https://github.com/erlang/otp/tree/master/lib/dialyzer/test)
