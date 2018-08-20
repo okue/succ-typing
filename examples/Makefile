@@ -4,9 +4,10 @@ compile:
 dialyzer: compile
 	dialyzer ebin\
 		--no_check_plt\
-		-Wunmatched_returns -Werror_handling\
+		-Wunmatched_returns\
+		-Werror_handling\
 		-Wrace_conditions\
-		-Wunderspecs -Woverspecs
+		-Wspecdiffs
 
 typer: compile
 	typer *.erl
